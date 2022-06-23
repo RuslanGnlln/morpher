@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     string filename2("ted_cruz.jpg");
 
     //alpha controls the degree of morph
-    double alpha = 0.25;
+    double alpha = 0.0;
 
     //Read input images
     Mat img1 = imread(filename1);
@@ -99,58 +99,59 @@ int main(int argc, char** argv)
     img2.convertTo(img2, CV_32F);
 
 
-    //empty average image
-    Mat imgMorph = Mat::zeros(img1.size(), CV_32FC3);
+    for (int ii = 0; ii < 10; ii++) {
+        alpha += 0.1;
+        //empty average image
+        Mat imgMorph = Mat::zeros(img1.size(), CV_32FC3);
 
 
-    //Read points
-    vector<Point2f> points1 = readPoints(filename1 + ".txt");
-    vector<Point2f> points2 = readPoints(filename2 + ".txt");
-    vector<Point2f> points;
+        //Read points
+        vector<Point2f> points1 = readPoints(filename1 + ".txt");
+        vector<Point2f> points2 = readPoints(filename2 + ".txt");
+        vector<Point2f> points;
 
-    //compute weighted average point coordinates
-    for (int i = 0; i < points1.size(); i++)
-    {
-        float x, y;
-        x = (1 - alpha) * points1[i].x + alpha * points2[i].x;
-        y = (1 - alpha) * points1[i].y + alpha * points2[i].y;
+        //compute weighted average point coordinates
+        for (int i = 0; i < points1.size(); i++)
+        {
+            float x, y;
+            x = (1 - alpha) * points1[i].x + alpha * points2[i].x;
+            y = (1 - alpha) * points1[i].y + alpha * points2[i].y;
 
-        points.push_back(Point2f(x, y));
+            points.push_back(Point2f(x, y));
 
+        }
+
+
+        //Read triangle indices
+        ifstream ifs("tri.txt");
+        int x, y, z;
+
+        while (ifs >> x >> y >> z)
+        {
+            // Triangles
+            vector<Point2f> t1, t2, t;
+
+            // Triangle corners for image 1.
+            t1.push_back(points1[x]);
+            t1.push_back(points1[y]);
+            t1.push_back(points1[z]);
+
+            // Triangle corners for image 2.
+            t2.push_back(points2[x]);
+            t2.push_back(points2[y]);
+            t2.push_back(points2[z]);
+
+            // Triangle corners for morphed image.
+            t.push_back(points[x]);
+            t.push_back(points[y]);
+            t.push_back(points[z]);
+
+            morphTriangle(img1, img2, imgMorph, t1, t2, t, alpha);
+
+        }
+
+        // Display Result
+        imshow("Morphed Face", imgMorph / 255.0);
+        waitKey(0);
     }
-
-
-    //Read triangle indices
-    ifstream ifs("tri.txt");
-    int x, y, z;
-
-    while (ifs >> x >> y >> z)
-    {
-        // Triangles
-        vector<Point2f> t1, t2, t;
-
-        // Triangle corners for image 1.
-        t1.push_back(points1[x]);
-        t1.push_back(points1[y]);
-        t1.push_back(points1[z]);
-
-        // Triangle corners for image 2.
-        t2.push_back(points2[x]);
-        t2.push_back(points2[y]);
-        t2.push_back(points2[z]);
-
-        // Triangle corners for morphed image.
-        t.push_back(points[x]);
-        t.push_back(points[y]);
-        t.push_back(points[z]);
-
-        morphTriangle(img1, img2, imgMorph, t1, t2, t, alpha);
-
-    }
-
-    // Display Result
-    imshow("Morphed Face", imgMorph / 255.0);
-    waitKey(0);
-
-    return 0;
 }
