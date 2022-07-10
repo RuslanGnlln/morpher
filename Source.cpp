@@ -84,8 +84,8 @@ void morphTriangle(Mat& img1, Mat& img2, Mat& img, vector<Point2f>& t1, vector<P
 int main(int argc, char** argv)
 {
 
-    string filename1("hillary_clinton.jpg");
-    string filename2("ted_cruz.jpg");
+    string filename1("chel.jpg");
+    string filename2("cat.jpg");
 
     //alpha controls the degree of morph
     double alpha = 0.0;
